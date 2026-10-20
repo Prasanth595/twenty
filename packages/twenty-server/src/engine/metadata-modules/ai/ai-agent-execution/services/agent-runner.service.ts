@@ -1,12 +1,18 @@
 import { Injectable, Logger } from '@nestjs/common';
 
 import { isNonEmptyString } from '@sniptt/guards';
-import { generateId } from 'ai';
-import { type AgentRunSummary } from 'twenty-shared/ai';
+import { generateId, type ToolSet } from 'ai';
+import {
+  ATTACH_CONVERSATION_TO_RECORD_TOOL_NAME,
+  type AgentRunSummary,
+} from 'twenty-shared/ai';
 import { type PendingWakeUpCondition } from 'twenty-shared/pending-wake-up';
+import { FeatureFlagKey } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 
+import { isUserAuthContext } from 'src/engine/core-modules/auth/guards/is-user-auth-context.guard';
 import { workspaceAuthContextStorage } from 'src/engine/core-modules/auth/storage/workspace-auth-context.storage';
+import { FeatureFlagService } from 'src/engine/core-modules/feature-flag/services/feature-flag.service';
 import { InjectMessageQueue } from 'src/engine/core-modules/message-queue/decorators/message-queue.decorator';
 import { MessageQueue } from 'src/engine/core-modules/message-queue/message-queue.constants';
 import { MessageQueueService } from 'src/engine/core-modules/message-queue/services/message-queue.service';
@@ -24,6 +30,7 @@ import { AgentTurnStatus } from 'src/engine/metadata-modules/ai/ai-history/enums
 import { addStepToAgentTurnUsage } from 'src/engine/metadata-modules/ai/ai-billing/utils/add-step-to-agent-turn-usage.util';
 import { type AgentRunCaller } from 'src/engine/metadata-modules/ai/ai-agent-execution/types/agent-run-caller.type';
 import { type AgentExecutionResult } from 'src/engine/metadata-modules/ai/ai-agent-execution/types/agent-execution-result.type';
+import { type AgentRunExecutionContext } from 'src/engine/metadata-modules/ai/ai-agent-execution/types/agent-run-execution-context.type';
 import { type AgentRunnerOutcome } from 'src/engine/metadata-modules/ai/ai-agent-execution/types/agent-runner-outcome.type';
 import { type AgentRunnerRunInput } from 'src/engine/metadata-modules/ai/ai-agent-execution/types/agent-runner-run-input.type';
 import { type AgentRunSuspension } from 'src/engine/metadata-modules/ai/ai-agent-execution/types/agent-run-suspension.type';
@@ -33,7 +40,10 @@ import { type RunAgentJobData } from 'src/engine/metadata-modules/ai/ai-agent-ex
 import { buildAgentRunSummary } from 'src/engine/metadata-modules/ai/ai-agent-execution/utils/build-agent-run-summary.util';
 import { sumAgentRunSummaries } from 'src/engine/metadata-modules/ai/ai-agent-execution/utils/sum-agent-run-summaries.util';
 import { AgentEntity } from 'src/engine/metadata-modules/ai/ai-agent/entities/agent.entity';
+import { CHAT_SYSTEM_PROMPTS } from 'src/engine/metadata-modules/ai/ai-chat/constants/chat-system-prompts.const';
 import { AgentChatParkedRunsService } from 'src/engine/metadata-modules/ai/ai-chat/services/agent-chat-parked-runs.service';
+import { AgentChatThreadTargetService } from 'src/engine/metadata-modules/ai/ai-chat/services/agent-chat-thread-target.service';
+import { createAttachConversationToRecordTool } from 'src/engine/metadata-modules/ai/ai-chat/tools/attach-conversation-to-record.tool';
 import { AgentChatEventPublisherService } from 'src/engine/metadata-modules/ai/ai-chat/services/agent-chat-event-publisher.service';
 import {
   type AgentChatStreamClaim,
@@ -47,6 +57,7 @@ import {
   AiException,
   AiExceptionCode,
 } from 'src/engine/metadata-modules/ai/ai.exception';
+import { isDenyingRoleIdsBySource } from 'src/engine/twenty-orm/utils/is-denying-role-ids-by-source.util';
 import { InjectWorkspaceScopedRepository } from 'src/engine/twenty-orm/workspace-scoped-repository/inject-workspace-scoped-repository.decorator';
 import { WorkspaceScopedRepository } from 'src/engine/twenty-orm/workspace-scoped-repository/workspace-scoped-repository';
 
@@ -80,6 +91,8 @@ export class AgentRunnerService {
     private readonly streamRecoveryService: AgentChatStreamRecoveryService,
     private readonly eventPublisherService: AgentChatEventPublisherService,
     private readonly parkedRunsService: AgentChatParkedRunsService,
+    private readonly agentChatThreadTargetService: AgentChatThreadTargetService,
+    private readonly featureFlagService: FeatureFlagService,
     @InjectMessageQueue(MessageQueue.aiQueue)
     private readonly messageQueueService: MessageQueueService,
     @InjectWorkspaceScopedRepository(AgentEntity)
@@ -451,6 +464,49 @@ export class AgentRunnerService {
     return result;
   }
 
+  private async buildConversationTools({
+    workspaceId,
+    threadId,
+    canAttachConversationToRecords,
+    executionContext: { authContext, rolePermissionConfig },
+  }: {
+    workspaceId: string;
+    threadId: string;
+    canAttachConversationToRecords?: boolean;
+    executionContext: Pick<
+      AgentRunExecutionContext,
+      'authContext' | 'rolePermissionConfig'
+    >;
+  }): Promise<ToolSet> {
+    if (
+      !canAttachConversationToRecords ||
+      !isUserAuthContext(authContext) ||
+      ('intersectionOf' in rolePermissionConfig &&
+        isDenyingRoleIdsBySource(rolePermissionConfig.intersectionOf)) ||
+      !(await this.featureFlagService.isFeatureEnabled(
+        FeatureFlagKey.IS_AI_CHAT_INBOX_ENABLED,
+        workspaceId,
+      ))
+    ) {
+      return {};
+    }
+
+    return {
+      [ATTACH_CONVERSATION_TO_RECORD_TOOL_NAME]:
+        createAttachConversationToRecordTool({
+          agentChatThreadTargetService: this.agentChatThreadTargetService,
+          toolContext: {
+            workspaceId,
+            threadId,
+            authContext,
+            rolePermissionConfig,
+            userId: authContext.user.id,
+            userWorkspaceId: authContext.userWorkspaceId,
+          },
+        }),
+    };
+  }
+
   private async runTurn({
     input,
     suspension,
@@ -507,6 +563,13 @@ export class AgentRunnerService {
       ({ id }) => !promptMessageIds.includes(id),
     );
 
+    const conversationTools = await this.buildConversationTools({
+      workspaceId,
+      threadId,
+      canAttachConversationToRecords:
+        spec.capabilities.canAttachConversationToRecords,
+      executionContext,
+    });
     const startedAtMs = Date.now();
     const turnInput = {
       agent,
@@ -517,9 +580,13 @@ export class AgentRunnerService {
       baseSystemPrompt: [
         spec.baseSystemPrompt,
         AGENT_WAIT_PROMPT,
+        ...(ATTACH_CONVERSATION_TO_RECORD_TOOL_NAME in conversationTools
+          ? [CHAT_SYSTEM_PROMPTS.CONVERSATION_ATTACHMENT]
+          : []),
         ...(isNonEmptyString(spec.instructions) ? [spec.instructions] : []),
       ].join('\n\n'),
       pausingTools: createAgentWaitTools(),
+      extraTools: conversationTools,
       canAskHumans: spec.capabilities.canAskHumans,
       responseFormat: spec.responseFormat ?? agent.responseFormat,
       workspaceId,

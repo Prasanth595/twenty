@@ -14,6 +14,7 @@ export type AgentRunSpec = {
   capabilities: {
     // ask_question, request_form and propose_tool_call, answered from the conversation
     canAskHumans: boolean;
+    canAttachConversationToRecords?: boolean;
   };
   additionalExcludedToolNames?: string[];
   toolLoadingStrategy?: AgentToolLoadingStrategy;
