@@ -108,7 +108,7 @@ export class ApplicationUninstallRunnerService {
       return;
     }
 
-    this.eventLogEmitterService.recordApplicationLogs([
+    this.eventLogEmitterService.recordApplicationPlatformEvents([
       buildApplicationLifecycleLogEntry({
         source: 'UNINSTALL',
         workspaceId,
