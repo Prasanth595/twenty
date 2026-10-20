@@ -23,22 +23,6 @@ jest.mock(
   }),
 );
 
-// The rich text inputs pull in BlockNote, which jest cannot load; they are
-// never rendered for a currency field.
-jest.mock(
-  '@/object-record/record-field/ui/form-types/components/FormRecordRichTextFieldInput',
-  () => ({
-    FormRecordRichTextFieldInput: () => null,
-  }),
-);
-
-jest.mock(
-  '@/object-record/record-field/ui/form-types/components/FormRichTextFieldInput',
-  () => ({
-    FormRichTextFieldInput: () => null,
-  }),
-);
-
 const currencyFieldMetadataItem = {
   id: 'amount-field-id',
   name: 'amount',
