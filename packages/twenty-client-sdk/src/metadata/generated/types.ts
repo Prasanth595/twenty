@@ -2431,11 +2431,20 @@ export default {
             "sdkPackage": [
                 1
             ],
+            "zeroDataRetention": [
+                4
+            ],
             "__typename": [
                 1
             ]
         },
         "ClientAiModelTierConfig": {
+            "aiDataResidency": [
+                1
+            ],
+            "isAiZeroDataRetentionRequired": [
+                4
+            ],
             "modelId": [
                 1
             ],
@@ -10860,6 +10869,9 @@ export default {
                     ]
                 }
             ],
+            "requestCountryCode": [
+                1
+            ],
             "skill": [
                 468,
                 {
@@ -13528,6 +13540,9 @@ export default {
             "aiChatModelTier": [
                 22
             ],
+            "aiDataResidency": [
+                1
+            ],
             "aiEvaluationModelId": [
                 1
             ],
@@ -13554,6 +13569,9 @@ export default {
             ],
             "inviteHash": [
                 1
+            ],
+            "isAiZeroDataRetentionRequired": [
+                4
             ],
             "isAutoModelSelectionEnabled": [
                 4
@@ -13583,6 +13601,9 @@ export default {
                 4
             ],
             "isPasswordAuthEnabled": [
+                4
+            ],
+            "isProductImprovementDataSharingEnabled": [
                 4
             ],
             "isPublicInviteLinkEnabled": [
@@ -14984,6 +15005,9 @@ export default {
             "aiChatModelTier": [
                 22
             ],
+            "aiDataResidency": [
+                1
+            ],
             "aiEvaluationModelId": [
                 1
             ],
@@ -15050,6 +15074,9 @@ export default {
             "inviteHash": [
                 1
             ],
+            "isAiZeroDataRetentionRequired": [
+                4
+            ],
             "isAutoModelSelectionEnabled": [
                 4
             ],
@@ -15081,6 +15108,9 @@ export default {
                 4
             ],
             "isPasswordAuthEnabled": [
+                4
+            ],
+            "isProductImprovementDataSharingEnabled": [
                 4
             ],
             "isPublicInviteLinkEnabled": [

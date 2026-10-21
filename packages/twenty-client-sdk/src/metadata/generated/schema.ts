@@ -1019,10 +1019,13 @@ export interface ClientAiModelConfig {
     providerLabel?: Scalars['String']
     providerName?: Scalars['String']
     sdkPackage?: Scalars['String']
+    zeroDataRetention?: Scalars['Boolean']
     __typename: 'ClientAiModelConfig'
 }
 
 export interface ClientAiModelTierConfig {
+    aiDataResidency?: Scalars['String']
+    isAiZeroDataRetentionRequired: Scalars['Boolean']
     modelId: Scalars['String']
     tier: AiModelTier
     __typename: 'ClientAiModelTierConfig'
@@ -2907,6 +2910,7 @@ export interface Query {
     publicMarketplaceApps: MarketplaceApp[]
     recordPermissions: RecordPermissionsResult[]
     recordSharing: RecordSharingDTO
+    requestCountryCode?: Scalars['String']
     skill?: Skill
     skills: Skill[]
     timelineActivityTypes: TimelineActivityType[]
@@ -3856,6 +3860,7 @@ export interface Workspace {
     aiAdditionalInstructions?: Scalars['String']
     aiAgentModelTier: AiModelTier
     aiChatModelTier: AiModelTier
+    aiDataResidency?: Scalars['String']
     aiEvaluationModelId?: Scalars['String']
     aiModelIdByTier: Scalars['JSON']
     allowImpersonation: Scalars['Boolean']
@@ -3878,6 +3883,7 @@ export interface Workspace {
     id: Scalars['UUID']
     installedApplications: Application[]
     inviteHash?: Scalars['String']
+    isAiZeroDataRetentionRequired: Scalars['Boolean']
     isAutoModelSelectionEnabled: Scalars['Boolean']
     isCampaignClickTrackingEnabled: Scalars['Boolean']
     isCampaignOpenTrackingEnabled: Scalars['Boolean']
@@ -3889,6 +3895,7 @@ export interface Workspace {
     isMicrosoftAuthEnabled: Scalars['Boolean']
     isPasswordAuthBypassEnabled: Scalars['Boolean']
     isPasswordAuthEnabled: Scalars['Boolean']
+    isProductImprovementDataSharingEnabled: Scalars['Boolean']
     isPublicInviteLinkEnabled: Scalars['Boolean']
     isTwoFactorAuthenticationEnforced: Scalars['Boolean']
     logo?: Scalars['String']
@@ -5084,11 +5091,14 @@ export interface ClientAiModelConfigGenqlSelection{
     providerLabel?: boolean | number
     providerName?: boolean | number
     sdkPackage?: boolean | number
+    zeroDataRetention?: boolean | number
     __typename?: boolean | number
     __scalar?: boolean | number
 }
 
 export interface ClientAiModelTierConfigGenqlSelection{
+    aiDataResidency?: boolean | number
+    isAiZeroDataRetentionRequired?: boolean | number
     modelId?: boolean | number
     tier?: boolean | number
     __typename?: boolean | number
@@ -7240,6 +7250,7 @@ export interface QueryGenqlSelection{
     publicMarketplaceApps?: (MarketplaceAppGenqlSelection & { __args: {isVetted: Scalars['Boolean']} })
     recordPermissions?: (RecordPermissionsResultGenqlSelection & { __args: {targets: RecordTargetInput[]} })
     recordSharing?: (RecordSharingDTOGenqlSelection & { __args: {target: RecordTargetInput} })
+    requestCountryCode?: boolean | number
     skill?: (SkillGenqlSelection & { __args: {id: Scalars['UUID']} })
     skills?: SkillGenqlSelection
     timelineActivityTypes?: TimelineActivityTypeGenqlSelection
@@ -7992,7 +8003,7 @@ export interface UpdateWebhookInputUpdates {description?: (Scalars['String'] | n
 
 export interface UpdateWorkspaceAllowedIframeOriginsInput {operation: Scalars['String'],origin: Scalars['String']}
 
-export interface UpdateWorkspaceInput {aiAdditionalInstructions?: (Scalars['String'] | null),aiAgentModelTier?: (AiModelTier | null),aiChatModelTier?: (AiModelTier | null),aiEvaluationModelId?: (Scalars['String'] | null),aiModelIdByTier?: (Scalars['JSON'] | null),allowImpersonation?: (Scalars['Boolean'] | null),customDomain?: (Scalars['String'] | null),defaultRoleId?: (Scalars['UUID'] | null),displayName?: (Scalars['String'] | null),editableProfileFields?: (Scalars['String'][] | null),eventLogRetentionDays?: (Scalars['Float'] | null),inviteHash?: (Scalars['String'] | null),isAutoModelSelectionEnabled?: (Scalars['Boolean'] | null),isCampaignClickTrackingEnabled?: (Scalars['Boolean'] | null),isCampaignOpenTrackingEnabled?: (Scalars['Boolean'] | null),isGoogleAuthBypassEnabled?: (Scalars['Boolean'] | null),isGoogleAuthEnabled?: (Scalars['Boolean'] | null),isInternalMessagesImportEnabled?: (Scalars['Boolean'] | null),isMicrosoftAuthBypassEnabled?: (Scalars['Boolean'] | null),isMicrosoftAuthEnabled?: (Scalars['Boolean'] | null),isPasswordAuthBypassEnabled?: (Scalars['Boolean'] | null),isPasswordAuthEnabled?: (Scalars['Boolean'] | null),isPublicInviteLinkEnabled?: (Scalars['Boolean'] | null),isTwoFactorAuthenticationEnforced?: (Scalars['Boolean'] | null),logo?: (Scalars['String'] | null),subdomain?: (Scalars['String'] | null),trashRetentionDays?: (Scalars['Float'] | null),workspaceDiscoverability?: (WorkspaceDiscoverability | null)}
+export interface UpdateWorkspaceInput {aiAdditionalInstructions?: (Scalars['String'] | null),aiAgentModelTier?: (AiModelTier | null),aiChatModelTier?: (AiModelTier | null),aiDataResidency?: (Scalars['String'] | null),aiEvaluationModelId?: (Scalars['String'] | null),aiModelIdByTier?: (Scalars['JSON'] | null),allowImpersonation?: (Scalars['Boolean'] | null),customDomain?: (Scalars['String'] | null),defaultRoleId?: (Scalars['UUID'] | null),displayName?: (Scalars['String'] | null),editableProfileFields?: (Scalars['String'][] | null),eventLogRetentionDays?: (Scalars['Float'] | null),inviteHash?: (Scalars['String'] | null),isAiZeroDataRetentionRequired?: (Scalars['Boolean'] | null),isAutoModelSelectionEnabled?: (Scalars['Boolean'] | null),isCampaignClickTrackingEnabled?: (Scalars['Boolean'] | null),isCampaignOpenTrackingEnabled?: (Scalars['Boolean'] | null),isGoogleAuthBypassEnabled?: (Scalars['Boolean'] | null),isGoogleAuthEnabled?: (Scalars['Boolean'] | null),isInternalMessagesImportEnabled?: (Scalars['Boolean'] | null),isMicrosoftAuthBypassEnabled?: (Scalars['Boolean'] | null),isMicrosoftAuthEnabled?: (Scalars['Boolean'] | null),isPasswordAuthBypassEnabled?: (Scalars['Boolean'] | null),isPasswordAuthEnabled?: (Scalars['Boolean'] | null),isProductImprovementDataSharingEnabled?: (Scalars['Boolean'] | null),isPublicInviteLinkEnabled?: (Scalars['Boolean'] | null),isTwoFactorAuthenticationEnforced?: (Scalars['Boolean'] | null),logo?: (Scalars['String'] | null),subdomain?: (Scalars['String'] | null),trashRetentionDays?: (Scalars['Float'] | null),workspaceDiscoverability?: (WorkspaceDiscoverability | null)}
 
 export interface UpdateWorkspaceMemberSettingsInput {update: Scalars['JSON'],workspaceMemberId: Scalars['UUID']}
 
@@ -8530,6 +8541,7 @@ export interface WorkspaceGenqlSelection{
     aiAdditionalInstructions?: boolean | number
     aiAgentModelTier?: boolean | number
     aiChatModelTier?: boolean | number
+    aiDataResidency?: boolean | number
     aiEvaluationModelId?: boolean | number
     aiModelIdByTier?: boolean | number
     allowImpersonation?: boolean | number
@@ -8552,6 +8564,7 @@ export interface WorkspaceGenqlSelection{
     id?: boolean | number
     installedApplications?: ApplicationGenqlSelection
     inviteHash?: boolean | number
+    isAiZeroDataRetentionRequired?: boolean | number
     isAutoModelSelectionEnabled?: boolean | number
     isCampaignClickTrackingEnabled?: boolean | number
     isCampaignOpenTrackingEnabled?: boolean | number
@@ -8563,6 +8576,7 @@ export interface WorkspaceGenqlSelection{
     isMicrosoftAuthEnabled?: boolean | number
     isPasswordAuthBypassEnabled?: boolean | number
     isPasswordAuthEnabled?: boolean | number
+    isProductImprovementDataSharingEnabled?: boolean | number
     isPublicInviteLinkEnabled?: boolean | number
     isTwoFactorAuthenticationEnforced?: boolean | number
     logo?: boolean | number

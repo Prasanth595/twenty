@@ -7,7 +7,12 @@ import assert from 'assert';
 import { isNonEmptyString } from '@sniptt/guards';
 
 import { msg } from '@lingui/core/macro';
-import { isAiModelTier, type AiModelTier } from 'twenty-shared/ai';
+import {
+  isAiModelCompliantWithDataPolicy,
+  isAiModelTier,
+  type AiDataPolicy,
+  type AiModelTier,
+} from 'twenty-shared/ai';
 import {
   MAX_ALLOWED_IFRAME_ORIGINS,
   PermissionFlagType,
@@ -149,6 +154,9 @@ export class WorkspaceService {
     aiModelIdByTier: PermissionFlagType.AI_SETTINGS,
     aiEvaluationModelId: PermissionFlagType.AI_SETTINGS,
     aiAdditionalInstructions: PermissionFlagType.WORKSPACE,
+    aiDataResidency: PermissionFlagType.SECURITY,
+    isAiZeroDataRetentionRequired: PermissionFlagType.SECURITY,
+    isProductImprovementDataSharingEnabled: PermissionFlagType.SECURITY,
     isInternalMessagesImportEnabled: PermissionFlagType.WORKSPACE,
     isCampaignClickTrackingEnabled: PermissionFlagType.WORKSPACE,
     isCampaignOpenTrackingEnabled: PermissionFlagType.WORKSPACE,
@@ -201,9 +209,11 @@ export class WorkspaceService {
   private validateAiModelIdByTier({
     aiModelIdByTier,
     storedAiModelIdByTier,
+    aiDataPolicy,
   }: {
     aiModelIdByTier: Partial<Record<AiModelTier, string>>;
     storedAiModelIdByTier: Partial<Record<AiModelTier, string>>;
+    aiDataPolicy: AiDataPolicy;
   }): void {
     for (const [tier, modelId] of Object.entries(aiModelIdByTier)) {
       if (!isAiModelTier(tier)) {
@@ -238,9 +248,20 @@ export class WorkspaceService {
         );
       }
 
-      if (!isDefined(this.aiModelRegistryService.getModelConfig(modelId))) {
+      const modelConfig = this.aiModelRegistryService.getModelConfig(modelId);
+
+      if (!isDefined(modelConfig)) {
         throw new WorkspaceException(
           `Model "${modelId}" is not in this instance's catalog`,
+          WorkspaceExceptionCode.AI_MODEL_PIN_NOT_VALID,
+        );
+      }
+
+      if (
+        !isAiModelCompliantWithDataPolicy({ model: modelConfig, aiDataPolicy })
+      ) {
+        throw new WorkspaceException(
+          `Model "${modelId}" does not meet the workspace's AI data policy`,
           WorkspaceExceptionCode.AI_MODEL_PIN_NOT_VALID,
         );
       }
@@ -443,6 +464,15 @@ export class WorkspaceService {
       this.validateAiModelIdByTier({
         aiModelIdByTier: payload.aiModelIdByTier,
         storedAiModelIdByTier: workspace.aiModelIdByTier,
+        aiDataPolicy: {
+          aiDataResidency:
+            payload.aiDataResidency === undefined
+              ? workspace.aiDataResidency
+              : payload.aiDataResidency,
+          isAiZeroDataRetentionRequired:
+            payload.isAiZeroDataRetentionRequired ??
+            workspace.isAiZeroDataRetentionRequired,
+        },
       });
     }
 
