@@ -2,8 +2,6 @@ import { styled } from '@linaria/react';
 import { useLingui } from '@lingui/react/macro';
 import { isDefined, isNonEmptyString } from 'twenty-shared/utils';
 import { IconHandClick, IconPencil } from 'twenty-ui/icon';
-import { VisuallyHidden } from 'twenty-ui/primitives/accessibility';
-import { Avatar } from 'twenty-ui/primitives/data-display';
 import { themeCssVariables, useTheme } from 'twenty-ui/theme';
 
 import { useIsAgentChatThreadShownAsUnread } from '@/ai/hooks/useIsAgentChatThreadShownAsUnread';
@@ -14,8 +12,6 @@ import { currentWorkspaceMemberState } from '@/auth/states/currentWorkspaceMembe
 import { currentWorkspaceMembersState } from '@/auth/states/currentWorkspaceMembersState';
 import { useAtomFamilySelectorValue } from '@/ui/utilities/state/jotai/hooks/useAtomFamilySelectorValue';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
-import { getWorkspaceMemberNameOrEmail } from '@/workspace-member/utils/getWorkspaceMemberNameOrEmail';
-import { getAbsoluteImageUrl } from '~/utils/image/getAbsoluteImageUrl';
 
 const StyledSubtitle = styled.div`
   align-items: center;
@@ -46,12 +42,6 @@ const StyledPreview = styled.div`
   white-space: nowrap;
 `;
 
-const StyledAssignee = styled.div`
-  display: flex;
-  flex-shrink: 0;
-  margin-left: auto;
-`;
-
 type AiChatThreadSubtitleProps = {
   thread: AgentChatThreadRecord;
 };
@@ -64,12 +54,6 @@ export const AiChatThreadSubtitle = ({ thread }: AiChatThreadSubtitleProps) => {
   const currentWorkspaceMembers = useAtomStateValue(
     currentWorkspaceMembersState,
   );
-  const assignee = currentWorkspaceMembers.find(
-    (workspaceMember) => workspaceMember.id === thread.assigneeId,
-  );
-  const assigneeName = isDefined(assignee)
-    ? getWorkspaceMemberNameOrEmail(assignee)
-    : undefined;
   const isAwaitingAnswer =
     !isDefined(thread.deletedAt) && isDefined(thread.pendingQuestionMessageId);
   const draftPreviewText = useAtomFamilySelectorValue(
@@ -104,18 +88,6 @@ export const AiChatThreadSubtitle = ({ thread }: AiChatThreadSubtitleProps) => {
         <span aria-hidden>·</span>
       )}
       <StyledPreview>{previewText}</StyledPreview>
-      {isDefined(assignee) && (
-        <StyledAssignee title={t`Assigned to ${assigneeName}`}>
-          <Avatar
-            src={getAbsoluteImageUrl(assignee.avatarUrl)}
-            colorSeed={assignee.id}
-            name={assigneeName}
-            size="xs"
-            shape="circle"
-          />
-          <VisuallyHidden>{t`, assigned to ${assigneeName}`}</VisuallyHidden>
-        </StyledAssignee>
-      )}
     </StyledSubtitle>
   );
 };

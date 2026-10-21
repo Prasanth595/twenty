@@ -1,3 +1,5 @@
+import { useMarkAgentChatThreadAsDoneInChannel } from '@/ai/hooks/useMarkAgentChatThreadAsDoneInChannel';
+import { useReopenAgentChatThreadInChannel } from '@/ai/hooks/useReopenAgentChatThreadInChannel';
 import { useUpdateAgentChatThreadInboxState } from '@/ai/hooks/useUpdateAgentChatThreadInboxState';
 import { HeadlessEngineCommandWrapperEffect } from '@/command-menu-item/engine-command/components/HeadlessEngineCommandWrapperEffect';
 import { useHeadlessCommandContextApi } from '@/command-menu-item/engine-command/hooks/useHeadlessCommandContextApi';
@@ -15,6 +17,10 @@ export const AgentChatThreadInboxCommand = ({
   const { selectedRecords } = useHeadlessCommandContextApi();
   const { updateAgentChatThreadInboxState } =
     useUpdateAgentChatThreadInboxState();
+  const { markAgentChatThreadAsDoneInChannel } =
+    useMarkAgentChatThreadAsDoneInChannel();
+  const { reopenAgentChatThreadInChannel } =
+    useReopenAgentChatThreadInChannel();
   const { openSnoozeAiChatInSidePanel } = useOpenSnoozeAiChatInSidePanel();
   const { openAssignAiChatInSidePanel } = useOpenAssignAiChatInSidePanel();
 
@@ -25,12 +31,28 @@ export const AgentChatThreadInboxCommand = ({
       return;
     }
 
+    const isInChannel = selectedRecords.every(
+      (record) => record.inboxStatus?.isChannelCopy ?? false,
+    );
+
     if (action === AgentChatInboxAction.SNOOZE) {
-      return openSnoozeAiChatInSidePanel(threadIds);
+      return openSnoozeAiChatInSidePanel({ threadIds, isInChannel });
     }
 
     if (action === 'assign') {
       return openAssignAiChatInSidePanel(threadIds);
+    }
+
+    if (isInChannel && action === AgentChatInboxAction.ARCHIVE) {
+      await Promise.all(threadIds.map(markAgentChatThreadAsDoneInChannel));
+
+      return;
+    }
+
+    if (isInChannel && action === AgentChatInboxAction.MOVE_TO_INBOX) {
+      await Promise.all(threadIds.map(reopenAgentChatThreadInChannel));
+
+      return;
     }
 
     await updateAgentChatThreadInboxState({ threadIds, action });
