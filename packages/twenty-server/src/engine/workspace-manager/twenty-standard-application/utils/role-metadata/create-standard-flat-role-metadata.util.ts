@@ -1,4 +1,5 @@
 import { type FlatRole } from 'src/engine/metadata-modules/flat-role/types/flat-role.type';
+import { STANDARD_APPLICATION_ROLE_LABEL } from 'src/engine/workspace-manager/twenty-standard-application/constants/standard-application-role-label.constant';
 import { type AllStandardRoleName } from 'src/engine/workspace-manager/twenty-standard-application/types/all-standard-role-name.type';
 import {
   type CreateStandardRoleArgs,
@@ -15,6 +16,7 @@ export const STANDARD_FLAT_ROLE_METADATA_BUILDERS_BY_ROLE_NAME = {
         description: 'Admin role',
         icon: 'IconUserCog',
         isEditable: false,
+        isSystem: false,
         canUpdateAllSettings: true,
         canAccessAllTools: true,
         canReadAllObjectRecords: true,
@@ -24,6 +26,27 @@ export const STANDARD_FLAT_ROLE_METADATA_BUILDERS_BY_ROLE_NAME = {
         canBeAssignedToUsers: true,
         canBeAssignedToAgents: false,
         canBeAssignedToApiKeys: true,
+      },
+    }),
+  standardApplication: (args: Omit<CreateStandardRoleArgs, 'context'>) =>
+    createStandardRoleFlatMetadata({
+      ...args,
+      context: {
+        roleName: 'standardApplication',
+        label: STANDARD_APPLICATION_ROLE_LABEL,
+        description: 'Default role of the Twenty standard application',
+        icon: 'IconApps',
+        isEditable: false,
+        isSystem: true,
+        canUpdateAllSettings: true,
+        canAccessAllTools: true,
+        canReadAllObjectRecords: true,
+        canUpdateAllObjectRecords: true,
+        canSoftDeleteAllObjectRecords: true,
+        canDestroyAllObjectRecords: true,
+        canBeAssignedToUsers: false,
+        canBeAssignedToAgents: false,
+        canBeAssignedToApiKeys: false,
       },
     }),
 } satisfies {

@@ -73,7 +73,7 @@ export const reconstructRolesManifest = ({
 
   const flatRoles = sortFlatEntitiesByUniversalIdentifier(
     applicationAllFlatEntityMaps.flatRoleMaps,
-  );
+  ).filter((flatRole) => !flatRole.isSystem);
   const parentRoleStatusByUniversalIdentifier = new Map<string, ParentStatus>(
     flatRoles.map(({ universalIdentifier }) => [
       universalIdentifier,

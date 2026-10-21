@@ -465,6 +465,7 @@ export class RecordSharingService {
 
     return Object.values(flatRoleMaps.byUniversalIdentifier)
       .filter(isDefined)
+      .filter((role) => !role.isSystem)
       .filter(
         (role) =>
           role.canBeAssignedToUsers ||

@@ -9,6 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+import { WasIntroducedInUpgrade } from 'src/engine/core-modules/upgrade/decorators/was-introduced-in-upgrade.decorator';
 import { FieldPermissionEntity } from 'src/engine/metadata-modules/object-permission/field-permission/field-permission.entity';
 import { ObjectPermissionEntity } from 'src/engine/metadata-modules/object-permission/object-permission.entity';
 import { RolePermissionFlagEntity } from 'src/engine/metadata-modules/role-permission-flag/role-permission-flag.entity';
@@ -58,6 +59,14 @@ export class RoleEntity extends SyncableEntity implements Required<RoleEntity> {
 
   @Column({ nullable: false, default: true })
   isEditable: boolean;
+
+  // Platform-managed and never listed to people, as on object and field metadata
+  @Column({ nullable: false, default: false })
+  @WasIntroducedInUpgrade({
+    upgradeCommandName:
+      '2.51.0_AddIsSystemToRoleFastInstanceCommand_1792575021921',
+  })
+  isSystem: boolean;
 
   @Column({ nullable: false, default: true })
   canBeAssignedToUsers: boolean;
