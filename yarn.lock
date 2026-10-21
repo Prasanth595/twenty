@@ -3623,12 +3623,64 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@blocknote/mantine@npm:^0.31.1":
-  version: 0.31.1
-  resolution: "@blocknote/mantine@npm:0.31.1"
+"@blocknote/core@npm:0.31.3":
+  version: 0.31.3
+  resolution: "@blocknote/core@npm:0.31.3"
   dependencies:
-    "@blocknote/core": "npm:0.31.1"
-    "@blocknote/react": "npm:0.31.1"
+    "@emoji-mart/data": "npm:^1.2.1"
+    "@shikijs/types": "npm:3.2.1"
+    "@tiptap/core": "npm:^2.12.0"
+    "@tiptap/extension-bold": "npm:^2.11.5"
+    "@tiptap/extension-code": "npm:^2.11.5"
+    "@tiptap/extension-gapcursor": "npm:^2.11.5"
+    "@tiptap/extension-history": "npm:^2.11.5"
+    "@tiptap/extension-horizontal-rule": "npm:^2.11.5"
+    "@tiptap/extension-italic": "npm:^2.11.5"
+    "@tiptap/extension-link": "npm:^2.11.5"
+    "@tiptap/extension-paragraph": "npm:^2.11.5"
+    "@tiptap/extension-strike": "npm:^2.11.5"
+    "@tiptap/extension-table-cell": "npm:^2.11.5"
+    "@tiptap/extension-table-header": "npm:^2.11.5"
+    "@tiptap/extension-text": "npm:^2.11.5"
+    "@tiptap/extension-underline": "npm:^2.11.5"
+    "@tiptap/pm": "npm:^2.12.0"
+    emoji-mart: "npm:^5.6.0"
+    hast-util-from-dom: "npm:^5.0.1"
+    prosemirror-dropcursor: "npm:^1.8.1"
+    prosemirror-highlight: "npm:^0.13.0"
+    prosemirror-model: "npm:^1.25.1"
+    prosemirror-state: "npm:^1.4.3"
+    prosemirror-tables: "npm:^1.6.4"
+    prosemirror-transform: "npm:^1.10.4"
+    prosemirror-view: "npm:^1.38.1"
+    rehype-format: "npm:^5.0.1"
+    rehype-parse: "npm:^9.0.1"
+    rehype-remark: "npm:^10.0.0"
+    rehype-stringify: "npm:^10.0.1"
+    remark-gfm: "npm:^4.0.1"
+    remark-parse: "npm:^11.0.0"
+    remark-rehype: "npm:^11.1.1"
+    remark-stringify: "npm:^11.0.0"
+    unified: "npm:^11.0.5"
+    uuid: "npm:^8.3.2"
+    y-prosemirror: "npm:^1.3.4"
+    y-protocols: "npm:^1.0.6"
+    yjs: "npm:^13.6.15"
+  peerDependencies:
+    "@hocuspocus/provider": ^2.15.2
+  peerDependenciesMeta:
+    "@hocuspocus/provider":
+      optional: true
+  checksum: 10c0/c232221dcbb5b17a87a6f56fbc1f4e94f2921e0612857d226f19073c96b834c5b0d4734ee164fef95e8989f8ccdafaf7b5ec9b91e34c4420fa989df5a5622bcb
+  languageName: node
+  linkType: hard
+
+"@blocknote/mantine@npm:^0.31.1":
+  version: 0.31.3
+  resolution: "@blocknote/mantine@npm:0.31.3"
+  dependencies:
+    "@blocknote/core": "npm:0.31.3"
+    "@blocknote/react": "npm:0.31.3"
     "@mantine/core": "npm:^7.10.1"
     "@mantine/hooks": "npm:^7.10.1"
     "@mantine/utils": "npm:^6.0.21"
@@ -3636,7 +3688,7 @@ __metadata:
   peerDependencies:
     react: ^18.0 || ^19.0 || >= 19.0.0-rc
     react-dom: ^18.0 || ^19.0 || >= 19.0.0-rc
-  checksum: 10c0/c06e080ca6fd49227a8b931765f77ae550f142107c4cabd3e2f7405c5fdc4b65fccbcbfb4ad89219afa328bf30180fbee6a31a142c8fc3594afdcba3c14aa2b2
+  checksum: 10c0/d69f6ee16e10c54c2a0aa2d92899acd1f32de672357fbb0bbe9ada9b2161491820c5504e4124a4d5b3b7da1c7b4efb3a727c73b87cefa672c7b5f2120333f29d
   languageName: node
   linkType: hard
 
@@ -3657,6 +3709,26 @@ __metadata:
     react: ^18.0 || ^19.0 || >= 19.0.0-rc
     react-dom: ^18.0 || ^19.0 || >= 19.0.0-rc
   checksum: 10c0/5e83e65c9c85b885153f557c469344554d6e47d860b1a34e7832f48305d1ee4db56d50abb6d006d1fd56da849be712ac00e5c79f5b5f5319d259e07352f3de0b
+  languageName: node
+  linkType: hard
+
+"@blocknote/react@npm:0.31.3":
+  version: 0.31.3
+  resolution: "@blocknote/react@npm:0.31.3"
+  dependencies:
+    "@blocknote/core": "npm:0.31.3"
+    "@emoji-mart/data": "npm:^1.2.1"
+    "@floating-ui/react": "npm:^0.26.4"
+    "@tiptap/core": "npm:^2.12.0"
+    "@tiptap/pm": "npm:^2.12.0"
+    "@tiptap/react": "npm:^2.12.0"
+    emoji-mart: "npm:^5.6.0"
+    lodash.merge: "npm:^4.6.2"
+    react-icons: "npm:^5.2.1"
+  peerDependencies:
+    react: ^18.0 || ^19.0 || >= 19.0.0-rc
+    react-dom: ^18.0 || ^19.0 || >= 19.0.0-rc
+  checksum: 10c0/da5d027f13c2886e8d29c451c186c1d9f69058b4100dc1bef277b0762baef9b3de1e3b527bb6268edb6d178ac65528ac2419aeb667e0c6b22d6c215af7c8ec9d
   languageName: node
   linkType: hard
 
