@@ -1,5 +1,6 @@
 import { styled } from '@linaria/react';
 import { useLingui } from '@lingui/react/macro';
+import { type ReactNode } from 'react';
 import { APPLICATION_MONITORING_RETENTION_IN_DAYS } from 'twenty-shared/constants';
 import { Section } from 'twenty-ui/components/layout';
 import { themeCssVariables } from 'twenty-ui/theme';
@@ -24,6 +25,11 @@ const StyledHealth = styled.div`
   gap: ${themeCssVariables.spacing[4]};
 `;
 
+const StyledHeaderActions = styled.div`
+  display: flex;
+  gap: ${themeCssVariables.spacing[2]};
+`;
+
 const StyledRetentionNotice = styled.div`
   color: ${themeCssVariables.font.color.tertiary};
   font-size: ${themeCssVariables.font.size.sm};
@@ -35,6 +41,7 @@ type ApplicationMonitoringProps = {
   selectedPeriod: ApplicationMonitoringPeriod;
   onPeriodChange: (period: ApplicationMonitoringPeriod) => void;
   isAdminView?: boolean;
+  additionalActions?: ReactNode;
 };
 
 export const ApplicationMonitoring = ({
@@ -43,6 +50,7 @@ export const ApplicationMonitoring = ({
   selectedPeriod,
   onPeriodChange,
   isAdminView = false,
+  additionalActions,
 }: ApplicationMonitoringProps) => {
   const { t, i18n } = useLingui();
 
@@ -72,12 +80,15 @@ export const ApplicationMonitoring = ({
         <Section.Header
           title={t`Health`}
           actions={
-            <ApplicationMonitoringPeriodSelect
-              dropdownId={`${instanceId}-period`}
-              value={displayedPeriod}
-              lookbackInHours={lookbackInHours}
-              onChange={onPeriodChange}
-            />
+            <StyledHeaderActions>
+              {additionalActions}
+              <ApplicationMonitoringPeriodSelect
+                dropdownId={`${instanceId}-period`}
+                value={displayedPeriod}
+                lookbackInHours={lookbackInHours}
+                onChange={onPeriodChange}
+              />
+            </StyledHeaderActions>
           }
         />
         <StyledHealth>
