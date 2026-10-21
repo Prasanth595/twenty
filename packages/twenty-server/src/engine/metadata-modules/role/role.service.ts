@@ -17,6 +17,7 @@ import { findFlatEntityByIdInFlatEntityMapsOrThrow } from 'src/engine/metadata-m
 import { findFlatEntityByUniversalIdentifier } from 'src/engine/metadata-modules/flat-entity/utils/find-flat-entity-by-universal-identifier.util';
 import { findManyFlatEntityByIdInFlatEntityMaps } from 'src/engine/metadata-modules/flat-entity/utils/find-many-flat-entity-by-id-in-flat-entity-maps.util';
 import { type FlatRole } from 'src/engine/metadata-modules/flat-role/types/flat-role.type';
+import { buildWorkspaceCustomApplicationFlatRole } from 'src/engine/metadata-modules/flat-role/utils/build-workspace-custom-application-flat-role.util';
 import { fromCreateRoleInputToFlatRoleToCreate } from 'src/engine/metadata-modules/flat-role/utils/from-create-role-input-to-flat-role-to-create.util';
 import { fromDeleteRoleInputToFlatRoleOrThrow } from 'src/engine/metadata-modules/flat-role/utils/from-delete-role-input-to-flat-role-or-throw.util';
 import { fromUpdateRoleInputToFlatRoleToUpdateOrThrow } from 'src/engine/metadata-modules/flat-role/utils/from-update-role-input-to-flat-role-to-update-or-throw.util';
@@ -64,7 +65,9 @@ export class RoleService {
       );
 
     return this.findManyWithRelationsFromCache(
-      Object.values(flatRoleMaps.byUniversalIdentifier).filter(isDefined),
+      Object.values(flatRoleMaps.byUniversalIdentifier)
+        .filter(isDefined)
+        .filter((flatRole) => !flatRole.isSystem),
       workspaceId,
     );
   }
@@ -135,7 +138,7 @@ export class RoleService {
       flatEntityMaps: flatRoleMaps,
     });
 
-    if (!isDefined(flatRole)) {
+    if (!isDefined(flatRole) || flatRole.isSystem) {
       return null;
     }
 
@@ -484,6 +487,48 @@ export class RoleService {
       },
       ownerFlatApplication,
       workspaceId,
+    });
+  }
+
+  public async createWorkspaceCustomApplicationRole({
+    workspaceId,
+    workspaceCustomFlatApplication,
+  }: {
+    workspaceId: string;
+    workspaceCustomFlatApplication: FlatApplication;
+  }): Promise<void> {
+    const flatRoleToCreate = buildWorkspaceCustomApplicationFlatRole({
+      workspaceId,
+      workspaceCustomFlatApplication,
+    });
+
+    const validateAndBuildResult =
+      await this.workspaceMigrationValidateBuildAndRunService.validateBuildAndRunWorkspaceMigration(
+        {
+          allFlatEntityOperationByMetadataName: {
+            role: {
+              flatEntityToCreate: [flatRoleToCreate],
+              flatEntityToDelete: [],
+              flatEntityToUpdate: [],
+            },
+          },
+          workspaceId,
+          isSystemBuild: true,
+          applicationUniversalIdentifier:
+            workspaceCustomFlatApplication.universalIdentifier,
+        },
+      );
+
+    if (validateAndBuildResult.status === 'fail') {
+      throw new WorkspaceMigrationBuilderException(
+        validateAndBuildResult,
+        'Multiple validation errors occurred while creating the workspace custom application role',
+      );
+    }
+
+    await this.applicationService.update(workspaceCustomFlatApplication.id, {
+      workspaceId,
+      defaultRoleId: flatRoleToCreate.id,
     });
   }
 

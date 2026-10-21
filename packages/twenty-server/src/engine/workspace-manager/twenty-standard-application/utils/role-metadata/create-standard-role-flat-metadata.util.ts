@@ -12,6 +12,7 @@ export type CreateStandardRoleContext = {
   description: string | null;
   icon: string | null;
   isEditable: boolean;
+  isSystem: boolean;
   canUpdateAllSettings: boolean;
   canAccessAllTools: boolean;
   canReadAllObjectRecords: boolean;
@@ -34,6 +35,7 @@ export const createStandardRoleFlatMetadata = ({
     description,
     icon,
     isEditable,
+    isSystem,
     canUpdateAllSettings,
     canAccessAllTools,
     canReadAllObjectRecords,
@@ -57,6 +59,7 @@ export const createStandardRoleFlatMetadata = ({
     description,
     icon,
     isEditable,
+    isSystem,
     canUpdateAllSettings,
     canAccessAllTools,
     canReadAllObjectRecords,
