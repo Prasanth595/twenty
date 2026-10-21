@@ -130,11 +130,14 @@ describe('A workspace Admin member cannot change the applications default roles'
         expectToFail: true,
         input: {
           idToUpdate: roleId(),
-          updatePayload: { canReadAllObjectRecords: false },
+          updatePayload: { label: 'Renamed application role' },
         },
       });
 
-      expect(errors).toBeDefined();
+      expect(errors?.[0]?.extensions?.code).toBeDefined();
+      expect(JSON.stringify(errors)).toMatch(
+        /not editable|cannot be assigned/i,
+      );
     });
 
     it('refuses deleteOneRole', async () => {
@@ -143,7 +146,10 @@ describe('A workspace Admin member cannot change the applications default roles'
         input: { idToDelete: roleId() },
       });
 
-      expect(errors).toBeDefined();
+      expect(errors?.[0]?.extensions?.code).toBeDefined();
+      expect(JSON.stringify(errors)).toMatch(
+        /not editable|cannot be assigned/i,
+      );
     });
 
     it('refuses object permissions', async () => {
@@ -154,13 +160,17 @@ describe('A workspace Admin member cannot change the applications default roles'
           objectPermissions: [
             {
               objectMetadataId: companyObjectMetadataId,
-              canReadObjectRecords: false,
+              canReadObjectRecords: true,
+              canUpdateObjectRecords: false,
             },
           ],
         },
       });
 
-      expect(errors).toBeDefined();
+      expect(errors?.[0]?.extensions?.code).toBeDefined();
+      expect(JSON.stringify(errors)).toMatch(
+        /not editable|cannot be assigned/i,
+      );
     });
 
     it('refuses field permissions', async () => {
@@ -179,7 +189,10 @@ describe('A workspace Admin member cannot change the applications default roles'
         },
       });
 
-      expect(errors).toBeDefined();
+      expect(errors?.[0]?.extensions?.code).toBeDefined();
+      expect(JSON.stringify(errors)).toMatch(
+        /not editable|cannot be assigned/i,
+      );
     });
 
     it('refuses permission flags', async () => {
@@ -191,7 +204,10 @@ describe('A workspace Admin member cannot change the applications default roles'
         },
       });
 
-      expect(errors).toBeDefined();
+      expect(errors?.[0]?.extensions?.code).toBeDefined();
+      expect(JSON.stringify(errors)).toMatch(
+        /not editable|cannot be assigned/i,
+      );
     });
 
     it('refuses row-level permission predicates', async () => {
@@ -211,7 +227,10 @@ describe('A workspace Admin member cannot change the applications default roles'
         },
       });
 
-      expect(errors).toBeDefined();
+      expect(errors?.[0]?.extensions?.code).toBeDefined();
+      expect(JSON.stringify(errors)).toMatch(
+        /not editable|cannot be assigned/i,
+      );
     });
 
     it('refuses assigning it to a member', async () => {
@@ -223,7 +242,10 @@ describe('A workspace Admin member cannot change the applications default roles'
         },
       });
 
-      expect(errors).toBeDefined();
+      expect(errors?.[0]?.extensions?.code).toBeDefined();
+      expect(JSON.stringify(errors)).toMatch(
+        /not editable|cannot be assigned/i,
+      );
     });
 
     it('refuses assigning it to an API key', async () => {
@@ -236,7 +258,9 @@ describe('A workspace Admin member cannot change the applications default roles'
         variables: { apiKeyId: API_KEY_DATA_SEED_IDS.ID_1, roleId: roleId() },
       });
 
-      expect(response.body.errors).toBeDefined();
+      expect(JSON.stringify(response.body.errors)).toMatch(
+        /cannot be assigned/i,
+      );
     });
 
     it('refuses assigning it to an agent', async () => {
@@ -249,7 +273,9 @@ describe('A workspace Admin member cannot change the applications default roles'
         variables: { agentId, roleId: roleId() },
       });
 
-      expect(response.body.errors).toBeDefined();
+      expect(JSON.stringify(response.body.errors)).toMatch(
+        /cannot be assigned/i,
+      );
     });
 
     it.each([
@@ -257,7 +283,7 @@ describe('A workspace Admin member cannot change the applications default roles'
         toolName: 'update_role',
         toolArguments: () => ({
           roleId: roleId(),
-          update: { canReadAllObjectRecords: false },
+          update: { label: 'Renamed application role' },
         }),
       },
       {
@@ -271,7 +297,8 @@ describe('A workspace Admin member cannot change the applications default roles'
           objectPermissions: [
             {
               objectMetadataId: companyObjectMetadataId,
-              canReadObjectRecords: false,
+              canReadObjectRecords: true,
+              canUpdateObjectRecords: false,
             },
           ],
         }),
@@ -308,6 +335,7 @@ describe('A workspace Admin member cannot change the applications default roles'
         });
 
         expect(output.success).toBe(false);
+        expect(output.error).toMatch(/not editable|cannot be assigned/);
       },
     );
   });

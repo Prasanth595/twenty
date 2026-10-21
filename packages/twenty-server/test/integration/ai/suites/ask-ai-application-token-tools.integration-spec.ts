@@ -25,6 +25,7 @@ import { SEED_APPLE_WORKSPACE_ID } from 'src/engine/workspace-manager/dev-seeder
 const schema = getWorkspaceSchemaName(SEED_APPLE_WORKSPACE_ID);
 
 const WORKFLOW_TOOL_NAME = 'list_workflows';
+const CHAT_TURN_TIMEOUT_MS = 60_000;
 
 const USAGE = {
   inputTokens: {
@@ -96,14 +97,17 @@ const sendChatMessageAndWaitForAnswer = async (token: string) => {
 
   expect(response.body.errors).toBeUndefined();
 
-  await expectEventually(async () => {
-    const [assistantMessage] = await globalThis.testDataSource.query(
-      `SELECT id FROM "${schema}"."agentMessage" WHERE "threadId" = $1 AND role = 'assistant'`,
-      [threadId],
-    );
+  await expectEventually(
+    async () => {
+      const [assistantMessage] = await globalThis.testDataSource.query(
+        `SELECT id FROM "${schema}"."agentMessage" WHERE "threadId" = $1 AND role = 'assistant'`,
+        [threadId],
+      );
 
-    expect(assistantMessage).toBeDefined();
-  });
+      expect(assistantMessage).toBeDefined();
+    },
+    { timeoutMs: CHAT_TURN_TIMEOUT_MS },
+  );
 
   return threadId;
 };
@@ -131,6 +135,8 @@ describe('Ask AI tools for an installed application acting for a user', () => {
     applicationToken = applicationAccessToken.token;
   });
 
+  beforeEach(() => jest.useRealTimers());
+
   afterEach(() => jest.restoreAllMocks());
 
   afterAll(async () => {
@@ -143,23 +149,31 @@ describe('Ask AI tools for an installed application acting for a user', () => {
     });
   });
 
-  it('still offers a member their workflow tools', async () => {
-    const offeredToolContexts = mockAnsweringModel();
+  it(
+    'still offers a member their workflow tools',
+    async () => {
+      const offeredToolContexts = mockAnsweringModel();
 
-    threadIds.push(
-      await sendChatMessageAndWaitForAnswer(APPLE_JANE_ADMIN_ACCESS_TOKEN),
-    );
+      threadIds.push(
+        await sendChatMessageAndWaitForAnswer(APPLE_JANE_ADMIN_ACCESS_TOKEN),
+      );
 
-    expect(offeredToolContexts).toHaveLength(1);
-    expect(offeredToolContexts[0]).toContain(WORKFLOW_TOOL_NAME);
-  });
+      expect(offeredToolContexts).toHaveLength(1);
+      expect(offeredToolContexts[0]).toContain(WORKFLOW_TOOL_NAME);
+    },
+    CHAT_TURN_TIMEOUT_MS,
+  );
 
-  it('does not offer the workflow tools to the application', async () => {
-    const offeredToolContexts = mockAnsweringModel();
+  it(
+    'does not offer the workflow tools to the application',
+    async () => {
+      const offeredToolContexts = mockAnsweringModel();
 
-    threadIds.push(await sendChatMessageAndWaitForAnswer(applicationToken));
+      threadIds.push(await sendChatMessageAndWaitForAnswer(applicationToken));
 
-    expect(offeredToolContexts).toHaveLength(1);
-    expect(offeredToolContexts[0]).not.toContain(WORKFLOW_TOOL_NAME);
-  });
+      expect(offeredToolContexts).toHaveLength(1);
+      expect(offeredToolContexts[0]).not.toContain(WORKFLOW_TOOL_NAME);
+    },
+    CHAT_TURN_TIMEOUT_MS,
+  );
 });

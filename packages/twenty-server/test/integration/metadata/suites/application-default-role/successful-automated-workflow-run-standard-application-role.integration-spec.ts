@@ -150,7 +150,7 @@ describe('An automated workflow run acts with the standard application role', ()
       state: {
         stepInfos: Record<
           string,
-          { status: string; result?: { totalCount?: number } }
+          { status: string; result?: { totalCount?: number | string } }
         >;
       };
     };
@@ -165,7 +165,9 @@ describe('An automated workflow run acts with the standard application role', ()
     });
 
     expect(
-      workflowRun!.state.stepInfos[findCompaniesStepId].result?.totalCount,
+      Number(
+        workflowRun!.state.stepInfos[findCompaniesStepId].result?.totalCount,
+      ),
     ).toBeGreaterThan(0);
 
     expect(executionContexts.length).toBeGreaterThan(0);
