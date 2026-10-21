@@ -542,12 +542,23 @@ export class AgentChatStreamingService {
         wakeUpId: suspendedRun.id,
         outcome: { type: 'MESSAGE_RECEIVED' },
       });
+      await this.streamRecoveryService.wakeNext({
+        threadId,
+        workspaceId,
+        shouldFlush: false,
+      });
 
       return;
     }
 
     // queued messages wait behind a pending tool call: they follow the answer rather than replace it
     if (isDefined(threadStatus.pendingQuestionMessageId)) {
+      await this.streamRecoveryService.wakeNext({
+        threadId,
+        workspaceId,
+        shouldFlush: false,
+      });
+
       return;
     }
 
@@ -605,6 +616,12 @@ export class AgentChatStreamingService {
       !isDefined(userWorkspaceId) ||
       !isDefined(workspaceMemberId)
     ) {
+      await this.streamRecoveryService.wakeNext({
+        threadId,
+        workspaceId,
+        shouldFlush: false,
+      });
+
       return;
     }
 
