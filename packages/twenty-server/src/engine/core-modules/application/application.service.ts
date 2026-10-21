@@ -26,6 +26,7 @@ import {
 } from 'src/engine/core-modules/application/application.exception';
 import { WORKSPACE_CUSTOM_APPLICATION_NAME } from 'src/engine/core-modules/application/constants/workspace-custom-application.constant';
 import { type FlatApplication } from 'src/engine/core-modules/application/types/flat-application.type';
+import { buildApplicationIdentifierWhereOrThrow } from 'src/engine/core-modules/application/utils/build-application-identifier-where-or-throw.util';
 import { FileStorageService } from 'src/engine/core-modules/file-storage/services/file-storage.service';
 import { WorkspaceEntity } from 'src/engine/core-modules/workspace/workspace.entity';
 import { AgentEntity } from 'src/engine/metadata-modules/ai/ai-agent/entities/agent.entity';
@@ -184,6 +185,49 @@ export class ApplicationService {
     );
   }
 
+  async findOneApplication({
+    id,
+    universalIdentifier,
+    workspaceId,
+  }: {
+    id?: string;
+    universalIdentifier?: string;
+    workspaceId: string;
+  }): Promise<ApplicationEntity | null> {
+    return this.applicationRepository.findOne(workspaceId, {
+      where: buildApplicationIdentifierWhereOrThrow({
+        id,
+        universalIdentifier,
+      }),
+      relations: ['applicationRegistration'],
+    });
+  }
+
+  async findOneApplicationOrThrow({
+    id,
+    universalIdentifier,
+    workspaceId,
+  }: {
+    id?: string;
+    universalIdentifier?: string;
+    workspaceId: string;
+  }): Promise<ApplicationEntity> {
+    const application = await this.findOneApplication({
+      id,
+      universalIdentifier,
+      workspaceId,
+    });
+
+    if (!isDefined(application)) {
+      throw new ApplicationException(
+        `Application with id ${id} or universalIdentifier ${universalIdentifier} not found`,
+        ApplicationExceptionCode.APPLICATION_NOT_FOUND,
+      );
+    }
+
+    return application;
+  }
+
   async findOneApplicationWithRelations({
     id,
     universalIdentifier,
@@ -193,15 +237,11 @@ export class ApplicationService {
     universalIdentifier?: string;
     workspaceId: string;
   }): Promise<ApplicationEntity | null> {
-    if (!isDefined(id) && !isDefined(universalIdentifier)) {
-      throw new ApplicationException(
-        `Either id or universalIdentifier must be provided to find application.`,
-        ApplicationExceptionCode.APPLICATION_NOT_FOUND,
-      );
-    }
-
     const application = await this.applicationRepository.findOne(workspaceId, {
-      where: isDefined(id) ? { id } : { universalIdentifier },
+      where: buildApplicationIdentifierWhereOrThrow({
+        id,
+        universalIdentifier,
+      }),
       relations: ['packageJsonFile', 'yarnLockFile', 'applicationRegistration'],
     });
 
