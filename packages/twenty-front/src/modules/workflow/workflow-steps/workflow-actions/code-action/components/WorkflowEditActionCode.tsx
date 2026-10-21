@@ -42,12 +42,14 @@ import { type editor } from 'monaco-editor';
 import { AutoTypings } from 'monaco-editor-auto-typings';
 import { useState } from 'react';
 import { Key } from 'ts-key-enum';
+import { isLinkOutputSchema } from '@/workflow/workflow-variables/types/guards/isLinkOutputSchema';
+import { type OutputSchemaV2 } from '@/workflow/workflow-variables/types/StepOutputSchemaV2';
 import {
   getOutputSchemaFromValue,
   jsonSchemaToInputSchema,
   type InputJsonSchema,
 } from 'twenty-shared/logic-function';
-import { isDefined } from 'twenty-shared/utils';
+import { isDefined, isEmptyObject } from 'twenty-shared/utils';
 import { getFunctionInputFromInputSchema } from 'twenty-shared/workflow';
 import { IconCode, IconPlayerPlay } from 'twenty-ui/icon';
 import { themeCssVariables } from 'twenty-ui/theme';
@@ -169,19 +171,27 @@ export const WorkflowEditActionCode = ({
 
       updateLogicFunctionInput(newMergedTestInput);
 
+      const existingOutputSchema = action.settings.outputSchema;
+      const shouldPreserveOutputSchema =
+        isDefined(existingOutputSchema) &&
+        !isEmptyObject(existingOutputSchema) &&
+        !isLinkOutputSchema(existingOutputSchema as OutputSchemaV2);
+
       updateAction({
         ...action,
         settings: {
           ...action.settings,
-          outputSchema: {
-            link: {
-              isLeaf: true,
-              icon: 'IconVariable',
-              tab: 'test',
-              label: t`Generate Function Output`,
-            },
-            _outputSchemaType: 'LINK',
-          },
+          outputSchema: shouldPreserveOutputSchema
+            ? existingOutputSchema
+            : {
+                link: {
+                  isLeaf: true,
+                  icon: 'IconVariable',
+                  tab: 'test',
+                  label: t`Generate Function Output`,
+                },
+                _outputSchemaType: 'LINK',
+              },
           input: {
             ...action.settings.input,
             logicFunctionInput: newMergedInput,
